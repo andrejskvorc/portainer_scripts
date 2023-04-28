@@ -66,6 +66,10 @@ elif [[ "$docker_edition" =~ ^[Ee]$ ]]; then
   sudo apt-get install -y docker-ee docker-ee-cli containerd.io
 fi
 
+# Start and enable Docker service
+sudo systemctl enable docker
+sudo systemctl start docker
+
 # Detect filesystem
 filesystem=$(df -T / | tail -1 | awk '{print $2}')
 
@@ -76,37 +80,7 @@ if [[ "$filesystem" != "zfs" && "$filesystem" != "btrfs" ]]; then
   fi
 fi
 
-# Start and enable Docker service
-sudo systemctl enable docker
-sudo systemctl start docker
-# Prompt user to choose between Docker CE and EE
-read -p "Do you want to install Docker Community Edition (CE) or Enterprise Edition (EE)? (C/E): " docker_edition
-
-# Install Docker CE
-if [[ "$docker_edition" =~ ^[Cc]$ ]]; then
-  echo "Installing Docker Community Edition..."
-  sudo apt-get update
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-# Install Docker EE
-elif [[ "$docker_edition" =~ ^[Ee]$ ]]; then
-  echo "Installing Docker Enterprise Edition..."
-  sudo apt-get update
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://packages.docker.com/1.13/install/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb https://packages.docker.com/1.13/apt/repo/ubuntu-$(lsb_release -cs) main"
-  sudo apt-get update
-  sudo apt-get install -y docker-ee docker-ee-cli containerd.io
-fi
-
-# Start and enable Docker service
-sudo systemctl enable docker
-sudo systemctl start docker
-
+sudo systemctl restart docker
 
 # Prompt user for Portainer Agent or Edge Agent
 read -p "Do you want to install Portainer Agent (A), Edge Agent (E), or neither (N)? (A/E/N): " agent_type
