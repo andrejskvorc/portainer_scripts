@@ -36,32 +36,6 @@ fi
 read -p "Do you want to open web ports (HTTP/HTTPS)? (y/n): " open_web_ports
 read -p "Do you want to open mail ports (SMTP/POP3/IMAP)? (y/n): " open_mail_ports
 
-# Detect filesystem
-filesystem=$(df -T / | tail -1 | awk '{print $2}')
-
-if [[ "$filesystem" != "zfs" && "$filesystem" != "btrfs" ]]; then
-  read -p "The current filesystem is not ZFS or BTRFS. Do you want to use the devicemapper storage driver? (y/N): " use_devicemapper
-  if [[ "$use_devicemapper" =~ ^[Yy]$ ]]; then
-    sudo apt-get install -y lvm2 thin-provisioning-tools && echo '{"storage-driver": "devicemapper"}' | sudo tee /etc/docker/daemon.json
-  fi
-fi
-
-# Prompt for Portainer edition
-read -p "Which edition of Portainer do you want to install? (ce or be): " portainer_edition
-if [ "$portainer_edition" == "be" ]; then
-  read -p "Do you have a Portainer license? (y/n): " has_license
-  if [ "$has_license" == "y" ]; then
-    read -p "Is the license in a file or will you enter the key as a string? (file/string): " license_type
-    if [ "$license_type" == "file" ]; then
-      read -p "Enter the full path to the Portainer license file: " license_path
-    else
-      read -p "Enter the Portainer license key: " license_key
-      echo "$license_key" > portainer_license_key.txt
-      license_path="./portainer_license_key.txt"
-    fi
-  fi
-fi
-
 # Prompt for enabling SSH login for the root user
 read -p "Do you want to enable SSH login for the root user? (y/n): " enable_root_ssh
 
@@ -95,34 +69,34 @@ fi
 # Start and enable Docker service
 sudo systemctl enable docker
 sudo systemctl start docker
-# Prompt user to choose between Docker CE and EE
-read -p "Do you want to install Docker Community Edition (CE) or Enterprise Edition (EE)? (C/E): " docker_edition
 
-# Install Docker CE
-if [[ "$docker_edition" =~ ^[Cc]$ ]]; then
-  echo "Installing Docker Community Edition..."
-  sudo apt-get update
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+# Detect filesystem
+filesystem=$(df -T / | tail -1 | awk '{print $2}')
 
-# Install Docker EE
-elif [[ "$docker_edition" =~ ^[Ee]$ ]]; then
-  echo "Installing Docker Enterprise Edition..."
-  sudo apt-get update
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://packages.docker.com/1.13/install/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb https://packages.docker.com/1.13/apt/repo/ubuntu-$(lsb_release -cs) main"
-  sudo apt-get update
-  sudo apt-get install -y docker-ee docker-ee-cli containerd.io
+if [[ "$filesystem" != "zfs" && "$filesystem" != "btrfs" ]]; then
+  read -p "The current filesystem is not ZFS or BTRFS. Do you want to use the devicemapper storage driver? (y/N): " use_devicemapper
+  if [[ "$use_devicemapper" =~ ^[Yy]$ ]]; then
+    sudo apt-get install -y lvm2 thin-provisioning-tools && echo '{"storage-driver": "devicemapper"}' | sudo tee /etc/docker/daemon.json
+  fi
 fi
 
-# Start and enable Docker service
-sudo systemctl enable docker
-sudo systemctl start docker
+sudo systemctl restart docker
 
+# Prompt for Portainer edition
+read -p "Which edition of Portainer do you want to install? (ce or be): " portainer_edition
+if [ "$portainer_edition" == "be" ]; then
+  read -p "Do you have a Portainer license? (y/n): " has_license
+  if [ "$has_license" == "y" ]; then
+    read -p "Is the license in a file or will you enter the key as a string? (file/string): " license_type
+    if [ "$license_type" == "file" ]; then
+      read -p "Enter the full path to the Portainer license file: " license_path
+    else
+      read -p "Enter the Portainer license key: " license_key
+      echo "$license_key" > portainer_license_key.txt
+      license_path="./portainer_license_key.txt"
+    fi
+  fi
+fi
 
 # Install Portainer
 sudo docker volume create portainer_data
