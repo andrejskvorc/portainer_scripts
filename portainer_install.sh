@@ -40,7 +40,7 @@ read -p "Do you want to open mail ports (SMTP/POP3/IMAP)? (y/n): " open_mail_por
 read -p "Do you want to enable SSH login for the root user? (y/n): " enable_root_ssh
 
 # Update and upgrade packages
-sudo apt update && sudo apt upgrade -y
+# sudo apt update && sudo apt upgrade -y
 
 # Prompt user to choose between Docker CE and EE
 read -p "Do you want to install Docker Community Edition (CE) or Enterprise Edition (EE)? (C/E): " docker_edition
