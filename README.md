@@ -1,3 +1,5 @@
+Tested on Ubunt 22.04.2 LTS
+
 To install Portainer you can use `wget` or `curl` to download the script from GitHub and then run it. Here's the process using `wget`:
 
 ```bash
