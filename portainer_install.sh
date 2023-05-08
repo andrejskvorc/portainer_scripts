@@ -101,9 +101,9 @@ fi
 # Install Portainer
 sudo docker volume create portainer_data
 if [ "$portainer_edition" == "be" ] && [ "$has_license" == "y" ]; then
-  sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -v $license_path:/license/portainer.lic portainer/portainer-ee
+  sudo docker run -d -p 8000:8000 -p 9443:9443 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -v $license_path:/license/portainer.lic portainer/portainer-ee
 else
-  sudo docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
+  sudo docker run -d -p 8000:8000 -p 9443:9443 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
 fi
 
 # Clean up sensitive data
